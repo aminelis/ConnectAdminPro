@@ -1,17 +1,17 @@
 import { Helmet } from 'react-helmet-async';
 
-import { AppView } from 'src/sections/overview/view';
+import AddUser from 'src/sections/login/Register';
 
 // ----------------------------------------------------------------------
 
-export default function AppPage() {
+export default function RegisterPage() {
   return (
     <>
       <Helmet>
-        <title> Dashboard </title>
+        <title> Register | Minimal UI </title>
       </Helmet>
 
-      <AppView />
+      <AddUser />
     </>
   );
 }

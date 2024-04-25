@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { faker } from '@faker-js/faker';
 
 import Container from '@mui/material/Container';
@@ -5,6 +7,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
 import Iconify from 'src/components/iconify';
+import { useTranslation } from 'react-i18next';
 
 import AppTasks from '../app-tasks';
 import AppNewsUpdate from '../app-news-update';
@@ -19,16 +22,45 @@ import AppConversionRates from '../app-conversion-rates';
 // ----------------------------------------------------------------------
 
 export default function AppView() {
+  const NameUser = localStorage.getItem('NameUser');
+  
+  const [userCountsByRegion, setUserCountsByRegion] = useState([]);
+
+  const [userCount, setUserCount] = useState([]);  
+
+  useEffect(() => {
+    axios.get('https://localhost:7013/api/Auth/region-count')
+      .then(response => {
+        setUserCountsByRegion(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios.get('https://localhost:7013/api/Auth/NewUser-count')
+      .then(response => {
+        setUserCount(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
+
+  const { t } = useTranslation();
+
+  console.log('userCount',userCount);
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
-        Hi, Welcome back 👋
+      {t('Hi')}, {t('welcome')} {NameUser.toUpperCase()} 👋
       </Typography>
 
       <Grid container spacing={3}>
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
-            title="Weekly Sales"
+            title={t('Sales')}
             total={714000}
             color="success"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
@@ -37,8 +69,8 @@ export default function AppView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
-            title="New Users"
-            total={1352831}
+            title={t('Users')} 
+            total={userCount}
             color="info"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
           />
@@ -46,7 +78,7 @@ export default function AppView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
-            title="Item Orders"
+            title={t('Items')}
             total={1723315}
             color="warning"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_buy.png" />}
@@ -55,7 +87,7 @@ export default function AppView() {
 
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
-            title="Bug Reports"
+            title={t('Bugs')}
             total={234}
             color="error"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_message.png" />}
@@ -64,7 +96,7 @@ export default function AppView() {
 
         <Grid xs={12} md={6} lg={8}>
           <AppWebsiteVisits
-            title="Website Visits"
+            title={t('Visits')}
             subheader="(+43%) than last year"
             chart={{
               labels: [
@@ -108,12 +140,7 @@ export default function AppView() {
           <AppCurrentVisits
             title="Current Visits"
             chart={{
-              series: [
-                { label: 'America', value: 4344 },
-                { label: 'Asia', value: 5435 },
-                { label: 'Europe', value: 1443 },
-                { label: 'Africa', value: 4443 },
-              ],
+              series: userCountsByRegion,
             }}
           />
         </Grid>

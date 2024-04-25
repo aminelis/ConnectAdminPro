@@ -9,11 +9,19 @@ export const UserPage = lazy(() => import('src/pages/user'));
 export const LoginPage = lazy(() => import('src/pages/login'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
+export const UserDetailsPage = lazy(() => import('src/sections/user/view/UserDetails'))
+export const AddProductPage = lazy(() => import('src/sections/products/view/AddProduct'))
+export const PageRegistre = lazy(() => import('src/pages/RegisterPage'));
+export const AddSimpleUserPage = lazy(() => import('src/sections/user/view/AddSimpleUser'))
 
 // ----------------------------------------------------------------------
 
 export default function Router() {
   const routes = useRoutes([
+    {
+      path: '/', // Chemin racine
+      element: <LoginPage />, // Affichage de la page de connexion pour le chemin racine
+    },
     {
       element: (
         <DashboardLayout>
@@ -23,15 +31,19 @@ export default function Router() {
         </DashboardLayout>
       ),
       children: [
-        { element: <IndexPage />, index: true },
+        { path: 'dashboard', element: <IndexPage /> },
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
         { path: 'blog', element: <BlogPage /> },
+        { path: 'UserDetails', element: <UserDetailsPage /> },
+        { path: 'AddProduct', element: <AddProductPage /> },
+        { path: 'AddSimpleUser', element: <AddSimpleUserPage /> }
+        
       ],
     },
     {
-      path: 'login',
-      element: <LoginPage />,
+      path: 'PageRegistre',
+      element: <PageRegistre />,
     },
     {
       path: '404',

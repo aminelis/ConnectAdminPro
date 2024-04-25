@@ -7,12 +7,12 @@ import Iconify from 'src/components/iconify';
 
 const StyledRoot = styled('div')(({ theme }) => ({
   zIndex: 999,
-  right: 0,
+  left: theme.spacing(40),
   display: 'flex',
   cursor: 'pointer',
   position: 'fixed',
   alignItems: 'center',
-  top: theme.spacing(16),
+  top: theme.spacing(20),
   height: theme.spacing(5),
   paddingLeft: theme.spacing(2),
   paddingRight: theme.spacing(2),
@@ -22,6 +22,8 @@ const StyledRoot = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   borderTopLeftRadius: Number(theme.shape.borderRadius) * 2,
   borderBottomLeftRadius: Number(theme.shape.borderRadius) * 2,
+  borderTopRightRadius: Number(theme.shape.borderRadius) * 2,
+  borderBottomRightRadius: Number(theme.shape.borderRadius) * 2,
   transition: theme.transitions.create('opacity'),
   '&:hover': { opacity: 0.72 },
 }));

@@ -1,4 +1,9 @@
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
+import { deletePdt } from 'src/Actions/PdtActions';
+import { toast } from 'react-toastify';
+import { Modal } from '@mui/material';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -9,11 +14,16 @@ import Typography from '@mui/material/Typography';
 import { fCurrency } from 'src/utils/format-number';
 
 import Label from 'src/components/label';
+import Popover from '@mui/material/Popover';
+import MenuItem from '@mui/material/MenuItem';
+import IconButton from '@mui/material/IconButton';
+import Iconify from 'src/components/iconify';
 import { ColorPreview } from 'src/components/color-utils';
+import UpdateProduct from './view/UpdateProduct';
 
 // ----------------------------------------------------------------------
 
-export default function ShopProductCard({ product }) {
+export default function ShopProductCard({ product, selected, onOpenOptions, onCloseOptions}) {
   const renderStatus = (
     <Label
       variant="filled"
@@ -21,7 +31,7 @@ export default function ShopProductCard({ product }) {
       sx={{
         zIndex: 9,
         top: 16,
-        right: 16,
+        right: 18,
         position: 'absolute',
         textTransform: 'uppercase',
       }}
@@ -30,11 +40,25 @@ export default function ShopProductCard({ product }) {
     </Label>
   );
 
+  const renderMenu = (
+    <IconButton
+    onClick={(event)=>setOpen(event.currentTarget)}
+      sx={{
+        zIndex: 9,
+        top: 9,
+        right: -8,
+        position: 'absolute',
+        }}
+    >
+      <Iconify icon="eva:more-vertical-fill" />
+    </IconButton>
+  );
+
   const renderImg = (
     <Box
       component="img"
       alt={product.name}
-      src={product.cover}
+      src={`data:image/jpeg;base64,${product.photo}`}
       sx={{
         top: 0,
         width: 1,
@@ -62,10 +86,48 @@ export default function ShopProductCard({ product }) {
     </Typography>
   );
 
+  let colorsArray = product.colors;
+
+  if (typeof product.colors === 'string') {
+    colorsArray = product.colors.split(',');
+    
+  }
+
+  const [open, setOpen] = useState(null);
+
+  const [ openModal, setOpenModal] = useState(false);
+
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleCloseMenu = () => {
+    setOpen(null);
+  };
+
+  const dispatch = useDispatch();
+
+  const tokenFromCookie = localStorage.getItem('token');
+
+  const handleDeleteProduct = async (e) => {
+    e.preventDefault();
+    try {
+      await dispatch(deletePdt(product.id, tokenFromCookie));
+      
+      toast.success('Product deleted with success!');
+    } catch (error) {
+      toast.error("Error when deleting !");
+    }
+  };
+
+
   return (
-    <Card>
+    <Card >
       <Box sx={{ pt: '100%', position: 'relative' }}>
         {product.status && renderStatus}
+        
+        {renderMenu}
 
         {renderImg}
       </Box>
@@ -76,14 +138,49 @@ export default function ShopProductCard({ product }) {
         </Link>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <ColorPreview colors={product.colors} />
+         {colorsArray && <ColorPreview colors={colorsArray} />}
+         {!colorsArray && <ColorPreview colors={product.colors} />}
           {renderPrice}
         </Stack>
       </Stack>
+
+
+<Popover
+        open={!!open}
+        anchorEl={open}
+        onClose={handleCloseMenu}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        PaperProps={{
+          sx: { width: 140 },
+        }}
+      >
+        <MenuItem onClick={() => setOpenModal(true)}>
+          <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
+          Edit
+        </MenuItem>
+
+        <MenuItem onClick={handleDeleteProduct} sx={{ color: 'error.main' }}>
+          <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
+          Delete
+        </MenuItem>
+
+      </Popover>
+
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '80%' }}>
+          <UpdateProduct product={product} handleCloseModal={handleCloseModal} />
+        </div>
+      </Modal>
+
     </Card>
+    
   );
 }
 
 ShopProductCard.propTypes = {
   product: PropTypes.object,
+  selected: PropTypes.bool,
+  onOpenOptions: PropTypes.func,
+  onCloseOptions: PropTypes.func,
 };

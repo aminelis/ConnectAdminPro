@@ -1,0 +1,20 @@
+{
+    "welcome": "Welcome back",
+    "Hi": "Hi",
+    "Visits": "Website Visits",
+    "Sales": "Weekly Sales",
+    "Users": "New Users",
+    "Items": "Item Orders",
+    "Bugs": "Bug Reports",
+    "nav": {
+      "dashboard": "Dashboard",
+      "user": "User",
+      "product": "Product"
+    },
+    "about": {
+        "home": "Home",
+        "settings": "Settings",
+        "logout": "Logout"
+      }
+  }
+  

@@ -1,0 +1,20 @@
+{
+    "welcome": "Bienvenue de retour",
+    "Hi": "Salut",
+    "Visits": "Visites du site Web",
+    "Sales": "Ventes hebdomadaires",
+    "Users": "nouveaux utilisateurs",
+    "Items": "Commandes d'articles",
+    "Bugs": "Rapports de bogues",
+    "nav": {
+      "dashboard": "Dashboard",
+      "user": "Utilisateur",
+      "product": "Produit"
+    },
+    "about": {
+        "home": "Maison",
+        "settings": "Paramétres",
+        "logout": "Se deconnecter"
+      }
+  }
+  

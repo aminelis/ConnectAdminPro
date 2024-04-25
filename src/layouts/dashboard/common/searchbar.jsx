@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 import Slide from '@mui/material/Slide';
 import Input from '@mui/material/Input';
 import Button from '@mui/material/Button';
@@ -7,9 +6,7 @@ import { styled } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
-
 import { bgBlur } from 'src/theme/css';
-
 import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
@@ -37,17 +34,69 @@ const StyledSearchbar = styled('div')(({ theme }) => ({
   },
 }));
 
-// ----------------------------------------------------------------------
-
 export default function Searchbar() {
   const [open, setOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [highlightColor] = useState('orange'); // Couleur de surbrillance par défaut
 
   const handleOpen = () => {
     setOpen(!open);
   };
 
   const handleClose = () => {
+    setSearchText('');
     setOpen(false);
+    setSearchResults([]);
+    removeHighlight();
+  };
+
+  const handleSearch = () => {
+    if (searchText.trim() !== '') {
+      const allElements = document.querySelectorAll('*');
+      const foundElements = [];
+
+      allElements.forEach((element) => {
+        if (element.innerText && element.innerText.toLowerCase().includes(searchText.toLowerCase())) {
+          foundElements.push(element);
+        }
+      });
+
+      setSearchResults(foundElements);
+      highlightSearchResults();
+    }
+  };
+
+  const handleChange = (event) => {
+    setSearchText(event.target.value);
+  };
+
+  const highlightSearchResults = () => {
+    searchResults.forEach((element) => {
+      const textNodes = element.childNodes;
+      textNodes.forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent.toLowerCase();
+          const newText = text.replace(new RegExp(searchText, 'gi'), (match) => `<span style="background-color: ${highlightColor}">${match}</span>`); // Utilisation de la couleur de surbrillance définie dans highlightColor
+          const spanElement = document.createElement('span');
+          spanElement.innerHTML = newText;
+          element.replaceChild(spanElement, node);
+        }
+      });
+    });
+  };
+
+  const removeHighlight = () => {
+    searchResults.forEach((element) => {
+      const textNodes = element.childNodes;
+      textNodes.forEach((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN' && node.style.backgroundColor === highlightColor) {
+          const text = node.textContent;
+          const textNode = document.createTextNode(text);
+          element.replaceChild(textNode, node);
+        }
+      });
+    });
   };
 
   return (
@@ -66,6 +115,8 @@ export default function Searchbar() {
               fullWidth
               disableUnderline
               placeholder="Search…"
+              value={searchText}
+              onChange={handleChange}
               startAdornment={
                 <InputAdornment position="start">
                   <Iconify
@@ -76,7 +127,7 @@ export default function Searchbar() {
               }
               sx={{ mr: 1, fontWeight: 'fontWeightBold' }}
             />
-            <Button variant="contained" onClick={handleClose}>
+            <Button variant="contained" onClick={handleSearch}>
               Search
             </Button>
           </StyledSearchbar>

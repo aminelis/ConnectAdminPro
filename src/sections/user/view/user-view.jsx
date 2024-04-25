@@ -1,4 +1,8 @@
-import { useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchAllUser } from 'src/Actions/PdtActions';
+import { useNavigate } from 'react-router-dom';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -9,8 +13,6 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
-
-import { users } from 'src/_mock/user';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -25,6 +27,9 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
+
+  const navigate = useNavigate();
+
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -37,6 +42,24 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
+  const tokenFromCookie = localStorage.getItem('token');
+
+  const usersArray = useSelector(state => state.auth.user || []);
+
+
+  const userss = Object.values(usersArray);
+
+  const dispatch = useDispatch();
+
+  const Isadmin = localStorage.getItem('checkMe');
+
+
+  useEffect(() => {
+    dispatch(fetchAllUser(tokenFromCookie));
+  }, [dispatch, tokenFromCookie]);
+
+  
+
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
     if (id !== '') {
@@ -47,18 +70,21 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.name);
+      const newSelecteds = userss.map((user) => user.id);
+      console.log('hello');
       setSelected(newSelecteds);
-      return;
+    } else {
+      setSelected([]);
     }
-    setSelected([]);
   };
+  
+  
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event, id) => {
+    const selectedIndex = selected.indexOf(id);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -71,6 +97,7 @@ export default function UserPage() {
     }
     setSelected(newSelected);
   };
+  
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -87,7 +114,7 @@ export default function UserPage() {
   };
 
   const dataFiltered = applyFilter({
-    inputData: users,
+    inputData: userss,
     comparator: getComparator(order, orderBy),
     filterName,
   });
@@ -99,9 +126,11 @@ export default function UserPage() {
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Users</Typography>
 
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+        {Isadmin === 'admin' && (
+        <Button variant="contained" color="inherit" onClick={() => navigate('/AddSimpleUser') } startIcon={<Iconify icon="eva:plus-fill"/>}>
           New User
         </Button>
+        )}
       </Stack>
 
       <Card>
@@ -117,7 +146,7 @@ export default function UserPage() {
               <UserTableHead
                 order={order}
                 orderBy={orderBy}
-                rowCount={users.length}
+                rowCount={userss.length}
                 numSelected={selected.length}
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
@@ -133,23 +162,28 @@ export default function UserPage() {
               <TableBody>
                 {dataFiltered
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
+                  .map((row,index) => (
                     <UserTableRow
-                      key={row.id}
-                      name={row.name}
+                    key={index}
+                      name={row.username}
                       role={row.role}
-                      status={row.status}
+                      status={row.status === 0 ? 'banned' : 'active'}
                       company={row.company}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
+                      avatarUrl={`data:image/jpeg;base64,${row.photo}`}
+                      Verified={row.verified === 0 ? 'No' : 'Yes'}
+                      selected={selected.indexOf(row.id) !== -1} // Modifier ici
+                      handleClick={(event) => {
+                        console.log("Value of row.id:", dataFiltered); // Ajouter le console.log ici
+                        handleClick(event, row.id);
+                      }}
+                      Isadmin = {Isadmin}
+                      userId={row.id}
                     />
                   ))}
 
                 <TableEmptyRows
                   height={77}
-                  emptyRows={emptyRows(page, rowsPerPage, users.length)}
+                  emptyRows={emptyRows(page, rowsPerPage, userss.length)}
                 />
 
                 {notFound && <TableNoData query={filterName} />}
@@ -161,7 +195,7 @@ export default function UserPage() {
         <TablePagination
           page={page}
           component="div"
-          count={users.length}
+          count={userss.length}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
           rowsPerPageOptions={[5, 10, 25]}
